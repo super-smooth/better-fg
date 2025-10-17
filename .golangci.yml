@@ -1,0 +1,83 @@
+version: "2"
+run:
+  modules-download-mode: readonly
+  tests: true
+linters:
+  enable:
+    - gocritic
+    - gocyclo
+    - godot
+    - gosec
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
+    - wsl_v5
+  settings:
+    gocritic:
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+        - whyNoLint
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gocyclo:
+      min-complexity: 15
+    godot:
+      scope: declarations
+      exclude:
+        - '^fixme:'
+        - '^todo:'
+      capital: false
+      period: true
+    gosec:
+      excludes:
+        - G204
+        - G304
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - checkPrivateReceivers
+            - sayRepetitiveInsteadOfStutters
+          disabled: false
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - gosec
+          - unparam
+        path: _test\.go
+      - linters:
+          - gosec
+        path: integration_test\.go
+      - path: (.+)\.go$
+        text: 'shadow: declaration of "err" shadows declaration'
+      - path: (.+)\.go$
+        text: Line contains TODO/BUG/FIXME
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+output:
+  formats:
+    text:
+      path: stdout
+      colors: true
