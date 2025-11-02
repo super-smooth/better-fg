@@ -178,7 +178,7 @@ jobs:
           fi
           go build -o dist/better-fg-${{ matrix.goos }}-${{ matrix.goarch }}${EXT} ./cmd/better-fg
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: better-fg-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/
