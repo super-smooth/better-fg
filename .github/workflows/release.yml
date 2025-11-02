@@ -106,10 +106,12 @@ jobs:
           LINUX_X86_64_SHA=$(sha256sum linux_x86_64.tar.gz | cut -d' ' -f1)
           # Update the formula with new version and hashes
           sed -i "s|download/v[^/]*/|download/v${VERSION}/|g" Formula/better-fg.rb
-          # Update SHA256 hashes in order they appear in the file
-          sed -i "0,/sha256.*/{s/sha256.*/sha256 \"sha256:${DARWIN_ARM64_SHA}\"/}" Formula/better-fg.rb
-          sed -i "2,/sha256.*/{s/sha256.*/sha256 \"sha256:${DARWIN_X86_64_SHA}\"/}" Formula/better-fg.rb
-          sed -i "3,/sha256.*/{s/sha256.*/sha256 \"sha256;${LINUX_X86_64_SHA}\"/}" Formula/better-fg.rb
+          
+          # Update SHA256 hashes for specific architectures by filename
+          # Pattern: /filename/,/sha256/ finds the line with filename, then the next line with "sha256" and replaces it
+          sed -i '/Darwin_arm64\.tar\.gz/,/sha256/ s/sha256.*/sha256 "'"${DARWIN_ARM64_SHA}"'"/' Formula/better-fg.rb
+          sed -i '/Darwin_x86_64\.tar\.gz/,/sha256/ s/sha256.*/sha256 "'"${DARWIN_X86_64_SHA}"'"/' Formula/better-fg.rb
+          sed -i '/Linux_x86_64\.tar\.gz/,/sha256/ s/sha256.*/sha256 "'"${LINUX_X86_64_SHA}"'"/' Formula/better-fg.rb
           # Commit and push changes
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
