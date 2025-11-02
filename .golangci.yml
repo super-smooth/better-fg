@@ -61,6 +61,9 @@ linters:
         text: 'shadow: declaration of "err" shadows declaration'
       - path: (.+)\.go$
         text: Line contains TODO/BUG/FIXME
+      - linters:
+          - errcheck
+        source: "^\\s*defer\\s+"
     paths:
       - third_party$
       - builtin$

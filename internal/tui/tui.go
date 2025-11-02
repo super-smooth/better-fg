@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 	"github.com/super-smooth/better-fg/internal/jobs"
 )
 
@@ -17,10 +18,12 @@ var (
 	itemStyle = lipgloss.NewStyle()
 
 	selectedItemStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("170"))
+				Foreground(lipgloss.Color("170")).
+				Bold(true)
 
 	titleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("170")).
+			Bold(true).
 			Padding(0, 1)
 )
 
@@ -84,9 +87,9 @@ func (d customDelegate) Render(w io.Writer, m list.Model, index int, listItem li
 	str := i.Title()
 
 	if index == m.Index() {
-		str = selectedItemStyle.Render(str)
+		str = selectedItemStyle.Render("▶ " + str)
 	} else {
-		str = itemStyle.Render(str)
+		str = itemStyle.Render("  " + str)
 	}
 
 	_, _ = fmt.Fprint(w, str)
@@ -163,7 +166,26 @@ func (m model) View() string {
 // Run starts the TUI and returns the selected job.
 func Run(jobList []jobs.Job) (*jobs.Job, error) {
 	m := NewModel(jobList)
-	p := tea.NewProgram(m, tea.WithOutput(os.Stderr))
+
+	// Use /dev/tty to ensure proper terminal access when run through shell functions
+	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+	if err != nil {
+		// Fallback to stderr if /dev/tty is not available
+		p := tea.NewProgram(m, tea.WithOutput(os.Stderr))
+
+		finalModel, err := p.Run()
+		if err != nil {
+			return nil, err
+		}
+
+		return finalModel.(model).choice, nil
+	}
+	defer tty.Close()
+
+	// Force color output
+	lipgloss.SetColorProfile(termenv.TrueColor)
+
+	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(tty))
 
 	finalModel, err := p.Run()
 	if err != nil {
