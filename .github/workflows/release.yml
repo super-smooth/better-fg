@@ -1,13 +1,10 @@
 name: Release
-
 on:
   push:
     tags:
       - 'v*'
-
 permissions:
   contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,53 +16,46 @@ jobs:
           - x86_64-darwin
           - aarch64-darwin
     steps:
-    - uses: actions/checkout@v4
-    
-    - uses: cachix/install-nix-action@v24
-      with:
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Build for ${{ matrix.system }}
-      run: |
-        nix build .#packages.${{ matrix.system }}.default
-        mkdir -p dist
-        cp result/bin/better-fg dist/better-fg-${{ matrix.system }}
-    
-    - uses: actions/upload-artifact@v3
-      with:
-        name: binaries
-        path: dist/
-
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build for ${{ matrix.system }}
+        run: |
+          nix build .#packages.${{ matrix.system }}.default
+          mkdir -p dist
+          cp result/bin/better-fg dist/better-fg-${{ matrix.system }}
+      - uses: actions/upload-artifact@v5
+        with:
+          name: binaries
+          path: dist/
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - uses: actions/download-artifact@v3
-      with:
-        name: binaries
-        path: dist/
-    
-    - name: Create archives
-      run: |
-        cd dist
-        for binary in better-fg-*; do
-          system=${binary#better-fg-}
-          case $system in
-            x86_64-linux) archive="better-fg_Linux_x86_64.tar.gz" ;;
-            aarch64-linux) archive="better-fg_Linux_arm64.tar.gz" ;;
-            x86_64-darwin) archive="better-fg_Darwin_x86_64.tar.gz" ;;
-            aarch64-darwin) archive="better-fg_Darwin_arm64.tar.gz" ;;
-          esac
-          mv "$binary" better-fg
-          tar czf "$archive" better-fg
-          rm better-fg
-        done
-    
-    - uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*.tar.gz
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v6
+        with:
+          name: binaries
+          path: dist/
+      - name: Create archives
+        run: |
+          cd dist
+          for binary in better-fg-*; do
+            system=${binary#better-fg-}
+            case $system in
+              x86_64-linux) archive="better-fg-Linux-x86_64.tar.gz" ;;
+              aarch64-linux) archive="better-fg-Linux-arm64.tar.gz" ;;
+              x86_64-darwin) archive="better-fg-Darwin-x86_64.tar.gz" ;;
+              aarch64-darwin) archive="better-fg-Darwin-arm64.tar.gz" ;;
+            esac
+            mv "$binary" better-fg
+            tar czf "$archive" better-fg
+            rm better-fg
+          done
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
