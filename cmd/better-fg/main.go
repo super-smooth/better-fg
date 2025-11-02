@@ -11,8 +11,8 @@ import (
 
 const shellFunc = `
 bfg() {
-  # Get the output of the 'jobs' command from the CURRENT shell
-  jobs_output=$(jobs)
+  # Get fresh job data from both stdout and stderr
+  jobs_output=$(jobs 2>&1)
 
   # If there are no jobs, do nothing
   if [ -z "$jobs_output" ]; then
@@ -21,7 +21,6 @@ bfg() {
   fi
 
   # Run the Go program and get the selected job
-  # Make sure the 'better-fg' binary is in your PATH
   selected_job=$(echo "$jobs_output" | command better-fg)
 
   # If a job was selected, bring it to the foreground
