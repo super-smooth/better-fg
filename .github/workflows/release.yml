@@ -84,7 +84,7 @@ jobs:
         id: octo-sts
         with:
           scope: super-smooth/better-fg
-          identity: release
+          identity: update-better-fg-version
       - name: Checkout homebrew-tap repository
         uses: actions/checkout@v4
         with:
