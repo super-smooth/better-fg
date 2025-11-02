@@ -77,12 +77,21 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
+      - name: Federate token from Octo STS
+        uses: octo-sts/action@6177b4481c00308b3839969c3eca88c96a91775f # v1.0.0
+        id: octo-sts
+        with:
+          scope: super-smooth/better-fg
+          identity: release
       - name: Checkout homebrew-tap repository
         uses: actions/checkout@v4
         with:
+          token: ${{ steps.octo-sts.outputs.token }}
           repository: super-smooth/homebrew-tap
-          token: ${{ secrets.GITHUB_TOKEN }}
           path: homebrew-tap
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HOMEBREW_TAP_SSH_KEY }}
       - name: Update Homebrew formula
         run: |
           cd homebrew-tap
@@ -106,5 +115,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/better-fg.rb
-          git commit -m "Update better-fg to v${VERSION}"
+          git commit -m "chore: Update better-fg to v${VERSION}"
           git push
