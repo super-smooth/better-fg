@@ -73,3 +73,38 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  update-homebrew-tap:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout homebrew-tap repository
+        uses: actions/checkout@v4
+        with:
+          repository: super-smooth/homebrew-tap
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: homebrew-tap
+      - name: Update Homebrew formula
+        run: |
+          cd homebrew-tap
+          # Extract version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+          # Download release assets to get SHA256 hashes
+          curl -L -o darwin_x86_64.tar.gz "https://github.com/super-smooth/better-fg/releases/download/v${VERSION}/better-fg_Darwin_x86_64.tar.gz"
+          curl -L -o darwin_arm64.tar.gz "https://github.com/super-smooth/better-fg/releases/download/v${VERSION}/better-fg_Darwin_arm64.tar.gz"
+          curl -L -o linux_x86_64.tar.gz "https://github.com/super-smooth/better-fg/releases/download/v${VERSION}/better-fg_Linux_x86_64.tar.gz"
+          # Calculate SHA256 hashes
+          DARWIN_X86_64_SHA=$(sha256sum darwin_x86_64.tar.gz | cut -d' ' -f1)
+          DARWIN_ARM64_SHA=$(sha256sum darwin_arm64.tar.gz | cut -d' ' -f1)
+          LINUX_X86_64_SHA=$(sha256sum linux_x86_64.tar.gz | cut -d' ' -f1)
+          # Update the formula with new version and hashes
+          sed -i "s|download/v[^/]*/|download/v${VERSION}/|g" Formula/better-fg.rb
+          # Update SHA256 hashes in order they appear in the file
+          sed -i "0,/sha256.*/{s/sha256.*/sha256 \"${DARWIN_ARM64_SHA}\"/}" Formula/better-fg.rb
+          sed -i "0,/sha256.*/{s/sha256.*/sha256 \"${DARWIN_X86_64_SHA}\"/}" Formula/better-fg.rb
+          sed -i "0,/sha256.*/{s/sha256.*/sha256 \"${LINUX_X86_64_SHA}\"/}" Formula/better-fg.rb
+          # Commit and push changes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/better-fg.rb
+          git commit -m "Update better-fg to v${VERSION}"
+          git push
