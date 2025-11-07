@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/super-smooth/better-fg/internal/jobs"
@@ -11,17 +13,20 @@ import (
 
 const shellFunc = `
 bfg() {
-  # Get fresh job data from both stdout and stderr
-  jobs_output=$(jobs 2>&1)
+  # Use a temporary file to capture all job output reliably
+  local temp_file=$(mktemp)
+  jobs > "$temp_file" 2>&1
 
-  # If there are no jobs, do nothing
-  if [ -z "$jobs_output" ]; then
+  # If there are no jobs, clean up and return
+  if [ ! -s "$temp_file" ]; then
+    rm "$temp_file"
     echo "No background jobs." >&2
     return
   fi
 
-  # Run the Go program and get the selected job
-  selected_job=$(echo "$jobs_output" | command better-fg)
+  # Run the Go program and get the selected job (pass through any arguments like --verbose)
+  selected_job=$(cat "$temp_file" | command better-fg "$@")
+  rm "$temp_file"
 
   # If a job was selected, bring it to the foreground
   if [ -n "$selected_job" ]; then
@@ -36,6 +41,8 @@ var rootCmd = &cobra.Command{
 	Long: `better-fg is a CLI tool that provides an interactive TUI for selecting from multiple background jobs.
 It also supports fuzzy searching for jobs and falls back to normal fg behavior when there is only one background job.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		verbose, _ := cmd.Flags().GetBool("verbose")
+
 		// Check if stdin has data
 		stat, err := os.Stdin.Stat()
 		if err != nil {
@@ -48,9 +55,26 @@ It also supports fuzzy searching for jobs and falls back to normal fg behavior w
 			return nil
 		}
 
-		jobs, err := jobs.Parse(os.Stdin)
+		// Read all input for debugging
+		input, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return fmt.Errorf("failed to read stdin: %w", err)
+		}
+
+		if verbose {
+			fmt.Fprintf(os.Stderr, "DEBUG: Received input: %q\n", string(input))
+		}
+
+		jobs, err := jobs.Parse(strings.NewReader(string(input)))
 		if err != nil {
 			return fmt.Errorf("failed to parse jobs: %w", err)
+		}
+
+		if verbose {
+			fmt.Fprintf(os.Stderr, "DEBUG: Parsed %d jobs\n", len(jobs))
+			for i, job := range jobs {
+				fmt.Fprintf(os.Stderr, "DEBUG: Job %d: ID=%d, State=%s, Command=%s\n", i, job.ID, job.State, job.Command)
+			}
 		}
 
 		if len(jobs) == 0 {
@@ -87,6 +111,7 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+	rootCmd.Flags().BoolP("verbose", "v", false, "Enable verbose debug output")
 }
 
 func main() {
