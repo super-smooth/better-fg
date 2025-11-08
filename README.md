@@ -2,6 +2,9 @@
 
 A more userfriendly and interactive version of `fg`.
 
+## Motivation
+Are you like me and frequently use `fg` to switch between applications? Does the `fg %[index of the job]` workflow feel a bit less than optimal? Then `better-fg` is for you!
+
 ## Features
 
 - Interactive TUI for selecting from multiple background jobs
