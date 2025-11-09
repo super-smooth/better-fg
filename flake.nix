@@ -27,7 +27,7 @@
 
           src = ./.;
 
-          vendorHash = "sha256-7BIdujoAlK10/9sBuBL1UNvrSkFos5VvxHVGbOiNFfo=";
+          vendorHash = "sha256-FYFCCkNP8Cuv7sIrfer5qkAivDArkzSYpe+SCJvYVwk=";
 
           subPackages = [ "cmd/better-fg" ];
 
