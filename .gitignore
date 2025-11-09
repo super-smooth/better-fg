@@ -22,7 +22,7 @@ go.work
 Thumbs.db
 
 # Build artifacts
-better-fg
+/better-fg
 /dist/
 /result/
 
