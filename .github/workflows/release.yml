@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v31.8.2
+      - uses: cachix/install-nix-action@v31.8.3
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build for x86_64-linux
@@ -29,7 +29,7 @@ jobs:
         arch: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v31.8.2
+      - uses: cachix/install-nix-action@v31.8.3
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build for ${{ matrix.arch }}-darwin
