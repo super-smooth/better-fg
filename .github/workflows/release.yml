@@ -33,7 +33,7 @@ jobs:
       - name: Build for aarch64-linux with Go cross-compilation
         run: |
           mkdir -p dist
-          nix develop --command bash -c 'GOOS=linux GOARCH=arm64 go build -o dist/better-fg-aarch64-linux ./cmd/better-fg'
+          nix develop --command bash -c 'CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o dist/better-fg-aarch64-linux ./cmd/better-fg'
       - uses: actions/upload-artifact@v7
         with:
           name: better-fg-aarch64-linux
