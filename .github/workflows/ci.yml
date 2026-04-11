@@ -10,9 +10,14 @@ jobs:
   check-gomod2nix:
     name: Check gomod2nix.toml
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
       - name: Restore and save Nix store
@@ -26,8 +31,29 @@ jobs:
           purge-created: 0
           purge-last-accessed: 0
           purge-primary-key: never
-      - name: Check gomod2nix.toml is up to date
-        run: nix develop --command ./scripts/check-gomod2nix.sh
+      - name: Install direnv
+        run: |
+          curl -sfL https://direnv.net/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Allow direnv
+        run: direnv allow
+      - name: Check and update gomod2nix.toml
+        run: |
+          # Generate fresh gomod2nix.toml
+          direnv exec . gomod2nix generate
+          
+          # Check if there are changes
+          if git diff --quiet gomod2nix.toml; then
+            echo "✅ gomod2nix.toml is up to date!"
+          else
+            echo "📝 gomod2nix.toml was updated"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add gomod2nix.toml
+            git commit -m "chore: update gomod2nix.toml"
+            git push
+            echo "✅ gomod2nix.toml has been updated and committed"
+          fi
 
   test:
     name: Test
