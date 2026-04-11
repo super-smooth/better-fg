@@ -72,6 +72,7 @@ It also supports fuzzy searching for jobs and falls back to normal fg behavior w
 
 		if verbose {
 			fmt.Fprintf(os.Stderr, "DEBUG: Parsed %d jobs\n", len(jobs))
+
 			for i, job := range jobs {
 				fmt.Fprintf(os.Stderr, "DEBUG: Job %d: ID=%d, State=%s, Command=%s\n", i, job.ID, job.State, job.Command)
 			}
