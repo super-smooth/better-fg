@@ -10,9 +10,14 @@ jobs:
   check-gomod2nix:
     name: Check gomod2nix.toml
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
       - name: Restore and save Nix store
@@ -26,8 +31,29 @@ jobs:
           purge-created: 0
           purge-last-accessed: 0
           purge-primary-key: never
-      - name: Check gomod2nix.toml is up to date
-        run: nix develop --command ./scripts/check-gomod2nix.sh
+      - name: Install direnv
+        run: |
+          curl -sfL https://direnv.net/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Allow direnv
+        run: direnv allow
+      - name: Check and update gomod2nix.toml
+        run: |
+          # Generate fresh gomod2nix.toml
+          direnv exec . gomod2nix generate
+          
+          # Check if there are changes
+          if git diff --quiet gomod2nix.toml; then
+            echo "✅ gomod2nix.toml is up to date!"
+          else
+            echo "📝 gomod2nix.toml was updated"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add gomod2nix.toml
+            git commit -m "chore: update gomod2nix.toml"
+            git push
+            echo "✅ gomod2nix.toml has been updated and committed"
+          fi
 
   test:
     name: Test
@@ -171,36 +197,88 @@ jobs:
             git diff flake.lock
             exit 1
           fi
-  build-cross-platform:
-    name: Build Cross Platform
+  build-linux-x86_64:
+    name: Build Linux x86_64
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-        exclude:
-          - goos: windows
-            goarch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
         with:
-          go-version: ${{ env.GO_VERSION }}
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: |
-          mkdir -p dist
-          EXT=""
-          if [ "$GOOS" = "windows" ]; then
-            EXT=".exe"
-          fi
-          go build -o dist/better-fg-${{ matrix.goos }}-${{ matrix.goarch }}${EXT} ./cmd/better-fg
-      - name: Upload artifacts
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: 0
+          purge-primary-key: never
+      - name: Build with Nix
+        run: nix build .#packages.x86_64-linux.default
+      - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: better-fg-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/
+          name: better-fg-x86_64-linux
+          path: result/bin/better-fg
+
+  build-linux-aarch64:
+    name: Build Linux aarch64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: 0
+          purge-primary-key: never
+      - name: Build aarch64 binary with Go cross-compilation
+        run: |
+          mkdir -p dist
+          nix develop --command bash -c 'CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o dist/better-fg-aarch64-linux ./cmd/better-fg'
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: better-fg-aarch64-linux
+          path: dist/better-fg-aarch64-linux
+
+  build-darwin:
+    name: Build Darwin
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 1G
+          purge: true
+          purge-prefixes: nix-${{ runner.os }}-
+          purge-created: 0
+          purge-last-accessed: 0
+          purge-primary-key: never
+      - name: Build with Nix
+        run: nix build .#packages.${{ matrix.arch }}-darwin.default
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: better-fg-${{ matrix.arch }}-darwin
+          path: result/bin/better-fg
