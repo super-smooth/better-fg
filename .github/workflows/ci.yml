@@ -4,6 +4,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_call:
+    secrets:
+      GPG_PRIVATE_KEY:
+        required: true
+      GPG_PASSPHRASE:
+        required: true
 env:
   GO_VERSION: '1.21.6'
   BOT_NAME: ${{ vars.BOT_NAME || 'super-smooth-bot' }}
@@ -52,7 +58,7 @@ jobs:
         run: |
           # Generate fresh gomod2nix.toml
           direnv exec . gomod2nix generate
-          
+
           # Check if there are changes
           if git diff --quiet gomod2nix.toml; then
             echo "✅ gomod2nix.toml is up to date!"
@@ -69,7 +75,6 @@ jobs:
             git push
             echo "✅ gomod2nix.toml has been updated and committed"
           fi
-
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -238,7 +243,6 @@ jobs:
         with:
           name: better-fg-x86_64-linux
           path: result/bin/better-fg
-
   build-linux-aarch64:
     name: Build Linux aarch64
     runs-on: ubuntu-latest
@@ -267,7 +271,6 @@ jobs:
         with:
           name: better-fg-aarch64-linux
           path: dist/better-fg-aarch64-linux
-
   build-darwin:
     name: Build Darwin
     runs-on: macos-latest
