@@ -202,10 +202,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-        exclude:
-          - goos: windows
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
             goarch: arm64
     steps:
       - name: Checkout code
@@ -220,11 +224,7 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           mkdir -p dist
-          EXT=""
-          if [ "$GOOS" = "windows" ]; then
-            EXT=".exe"
-          fi
-          go build -o dist/better-fg-${{ matrix.goos }}-${{ matrix.goarch }}${EXT} ./cmd/better-fg
+          go build -o dist/better-fg-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/better-fg
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
