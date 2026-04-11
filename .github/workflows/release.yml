@@ -18,7 +18,7 @@ jobs:
           nix build .#packages.x86_64-linux.default
           mkdir -p dist
           cp result/bin/better-fg dist/better-fg-x86_64-linux
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: better-fg-x86_64-linux
           path: dist/
@@ -37,7 +37,7 @@ jobs:
           nix build .#packages.${{ matrix.arch }}-darwin.default
           mkdir -p dist
           cp result/bin/better-fg dist/better-fg-${{ matrix.arch }}-darwin
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: better-fg-${{ matrix.arch }}-darwin
           path: dist/
