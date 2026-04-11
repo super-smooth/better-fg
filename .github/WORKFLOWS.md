@@ -6,10 +6,22 @@ This directory contains the GitHub Actions workflows for the better-fg project.
 
 ### 🔄 CI (`ci.yml`)
 **Triggers**: Push to main, Pull requests
+- **Prerequisites Check**: Detects if go.mod was modified and skips expensive jobs on non-bot commits
 - **Go Testing**: Runs tests on multiple Go versions (1.21, 1.22, 1.23)
 - **Linting**: golangci-lint, gofmt, go vet
 - **Nix Build**: Tests Nix package builds
 - **Cross-platform Build**: Tests compilation for multiple platforms
+
+**Optimization**: When Dependabot updates go.mod, the first CI run skips expensive jobs (test, lint, build). The `gomod2nix` workflow commits the updated gomod2nix.toml, which triggers a second CI run that executes all jobs with the correct state.
+
+### 📦 gomod2nix (`gomod2nix.yml`)
+**Triggers**: Pull requests (when go.mod is modified)
+- **Check**: Detects if go.mod was modified in the PR
+- **Update**: Regenerates gomod2nix.toml using Nix
+- **Commit**: Signs and commits the updated file as the bot user
+- **Skip**: Exits cleanly if go.mod was not modified
+
+This workflow runs before the full CI suite and ensures gomod2nix.toml is always in sync with go.mod changes.
 
 ### 📝 Commit Linting (`lint-commits.yml`)
 **Triggers**: Push to main, Pull requests
@@ -83,6 +95,16 @@ Automated dependency updates for:
 ## Required Secrets
 
 - `GITHUB_TOKEN`: Automatically provided by GitHub
+- `GH_PAT` (optional): Personal Access Token for the bot account to trigger workflows (falls back to GITHUB_TOKEN)
+- `GPG_PRIVATE_KEY` (optional): GPG key for signing automated commits
+- `GPG_PASSPHRASE` (optional): Passphrase for the GPG key
+
+## Configuration Variables
+
+The following variables can be configured at the organization or repository level:
+
+- `BOT_NAME` (optional): Name of the bot user for automated commits (default: `super-smooth-bot`)
+- `BOT_EMAIL` (optional): Email of the bot user for automated commits (default: `super-smooth-bot@anomaly.co`)
 
 ## Customization
 
