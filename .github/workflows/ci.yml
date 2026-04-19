@@ -44,15 +44,23 @@ jobs:
             exit 0
           fi
           
-          # Check if go.mod was modified in this PR
+          # Check if go.mod and gomod2nix.toml were modified in this PR
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
           echo "=== Changed files ==="
           echo "$CHANGED_FILES"
           echo ""
           
-          if echo "$CHANGED_FILES" | grep -q "^go\\.mod$"; then
-            echo "go.mod was modified in this PR"
+          GO_MOD_CHANGED=$(echo "$CHANGED_FILES" | grep -q "^go\\.mod$" && echo "true" || echo "false")
+          GOMOD2NIX_CHANGED=$(echo "$CHANGED_FILES" | grep -q "^gomod2nix\\.toml$" && echo "true" || echo "false")
+          
+          echo "go.mod changed: $GO_MOD_CHANGED"
+          echo "gomod2nix.toml changed: $GOMOD2NIX_CHANGED"
+          echo ""
+          
+          # Only skip if both go.mod AND gomod2nix.toml changed (dependency updates needing bot regeneration)
+          if [ "$GO_MOD_CHANGED" = "true" ] && [ "$GOMOD2NIX_CHANGED" = "true" ]; then
+            echo "Both go.mod and gomod2nix.toml were modified in this PR"
             
             # Check if the HEAD commit is by the bot
             COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
@@ -71,7 +79,7 @@ jobs:
               echo "should-skip=true" >> $GITHUB_OUTPUT
             fi
           else
-            echo "go.mod was not modified, running normally"
+            echo "Not a dependency update requiring bot regeneration, running normally"
             echo "should-skip=false" >> $GITHUB_OUTPUT
           fi
 
