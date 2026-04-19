@@ -44,7 +44,7 @@ jobs:
 
       - name: Restore and save Nix store
         if: steps.check-go-mod.outputs.go-mod-changed == 'true'
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-

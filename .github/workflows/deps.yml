@@ -22,7 +22,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
@@ -99,7 +99,7 @@ jobs:
             substituters = https://cache.nixos.org/
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           # restore and save a cache using this key
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
