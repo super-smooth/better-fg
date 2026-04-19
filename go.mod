@@ -1,6 +1,6 @@
 module github.com/super-smooth/better-fg
 
-go 1.24.4
+go 1.25
 
 require (
 	github.com/charmbracelet/bubbles v1.0.0
