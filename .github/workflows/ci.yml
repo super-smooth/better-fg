@@ -80,7 +80,7 @@ jobs:
 
       - name: Restore and save Nix store
         if: steps.check.outputs.needs-gomod2nix-check == 'true'
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
@@ -137,7 +137,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           # restore and save a cache using this key
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
@@ -179,7 +179,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           # restore and save a cache using this key
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
@@ -222,7 +222,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           # restore and save a cache using this key
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
@@ -269,7 +269,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
@@ -297,7 +297,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
@@ -330,7 +330,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
       - name: Restore and save Nix store
-        uses: nix-community/cache-nix-action@v6
+        uses: nix-community/cache-nix-action@v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/go.sum', '**/gomod2nix.toml') }}
           restore-prefixes-first-match: nix-${{ runner.os }}-
