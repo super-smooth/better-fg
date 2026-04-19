@@ -169,7 +169,7 @@ jobs:
       - name: Run unit tests
         run: nix develop --command go test -v -race -coverprofile=coverage.out ./...
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           file: ./coverage.out
           flags: unittests
