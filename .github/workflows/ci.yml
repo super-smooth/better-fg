@@ -5,9 +5,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  GO_VERSION: '1.25'
-
 jobs:
   check-prerequisites:
     name: Check PR prerequisites
@@ -94,22 +91,12 @@ jobs:
           purge-last-accessed: 0
           purge-primary-key: never
 
-      - name: Install direnv
-        if: steps.check.outputs.needs-gomod2nix-check == 'true'
-        run: |
-          curl -sfL https://direnv.net/install.sh | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Allow direnv
-        if: steps.check.outputs.needs-gomod2nix-check == 'true'
-        run: direnv allow
-
       - name: Check if gomod2nix.toml needs regeneration
         id: gomod2nix-check
         if: steps.check.outputs.needs-gomod2nix-check == 'true'
         run: |
           # Generate fresh gomod2nix.toml
-          direnv exec . gomod2nix generate
+          nix develop --command gomod2nix generate
           
           # Check if there are changes
           if git diff --quiet gomod2nix.toml; then
@@ -149,10 +136,6 @@ jobs:
         uses: actions/checkout@v6
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
-      - name: Install direnv
-        run: |
-          curl -sfL https://direnv.net/install.sh | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v6
         with:
@@ -175,12 +158,10 @@ jobs:
           purge-last-accessed: 0
           # except any version with the key that is the same as the `primary-key`
           purge-primary-key: never
-      - name: Allow direnv
-        run: direnv allow
       - name: Download dependencies
-        run: direnv exec . go mod download
+        run: nix develop --command go mod download
       - name: Run unit tests
-        run: direnv exec . go test -v -race -coverprofile=coverage.out ./...
+        run: nix develop --command go test -v -race -coverprofile=coverage.out ./...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -197,10 +178,6 @@ jobs:
         uses: actions/checkout@v6
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.4
-      - name: Install direnv
-        run: |
-          curl -sfL https://direnv.net/install.sh | bash
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v6
         with:
@@ -223,19 +200,17 @@ jobs:
           purge-last-accessed: 0
           # except any version with the key that is the same as the `primary-key`
           purge-primary-key: never
-      - name: Allow direnv
-        run: direnv allow
       - name: golangci-lint
-        run: direnv exec . golangci-lint run --timeout=5m
+        run: nix develop --command golangci-lint run --timeout=5m
       - name: Check formatting
         run: |
-          if [ "$(direnv exec . gofmt -s -l . | wc -l)" -gt 0 ]; then
+          if [ "$(nix develop --command gofmt -s -l . | wc -l)" -gt 0 ]; then
             echo "The following files are not formatted:"
-            direnv exec . gofmt -s -l .
+            nix develop --command gofmt -s -l .
             exit 1
           fi
       - name: Go vet
-        run: direnv exec . go vet ./...
+        run: nix develop --command go vet ./...
   nix-build:
     name: Nix Build
     needs: check-prerequisites
