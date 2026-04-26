@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: cachix/install-nix-action@v31.10.4
+      - uses: cachix/install-nix-action@v31.10.5
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build for x86_64-linux
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: cachix/install-nix-action@v31.10.4
+      - uses: cachix/install-nix-action@v31.10.5
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build for aarch64-linux with Go cross-compilation
@@ -45,7 +45,7 @@ jobs:
         arch: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v6
-      - uses: cachix/install-nix-action@v31.10.4
+      - uses: cachix/install-nix-action@v31.10.5
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build for ${{ matrix.arch }}-darwin

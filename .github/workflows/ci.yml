@@ -76,7 +76,7 @@ jobs:
 
       - name: Install Nix
         if: steps.check.outputs.needs-gomod2nix-check == 'true'
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
 
       - name: Restore and save Nix store
         if: steps.check.outputs.needs-gomod2nix-check == 'true'
@@ -139,7 +139,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Nix
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
@@ -183,7 +183,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Nix
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
@@ -229,7 +229,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Nix
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
@@ -276,7 +276,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Nix
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
@@ -304,7 +304,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Nix
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
@@ -337,7 +337,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Nix
-        uses: cachix/install-nix-action@v31.10.4
+        uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
         uses: nix-community/cache-nix-action@v7
         with:
