@@ -13,7 +13,7 @@ jobs:
       should-skip: ${{ steps.determine-skip.outputs.should-skip }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # Check out the actual PR head, not the merge commit
@@ -137,7 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
@@ -181,7 +181,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
@@ -227,7 +227,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
@@ -274,7 +274,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
@@ -302,7 +302,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
@@ -335,7 +335,7 @@ jobs:
         arch: [x86_64, aarch64]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Nix
         uses: cachix/install-nix-action@v31.10.5
       - name: Restore and save Nix store
